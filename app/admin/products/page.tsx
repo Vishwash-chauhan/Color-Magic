@@ -1,12 +1,20 @@
+export const dynamic = "force-dynamic";
 import { prisma } from "@/src/lib/prisma";
 import Link from "next/link";
 import { revalidatePath } from "next/cache";
 import DeleteProductButton from "@/src/components/DeleteProductButton";
 
 export default async function AdminProductsPage() {
-  const products = await prisma.product.findMany({
-    orderBy: [ { sortOrder: 'asc' }, { createdAt: 'desc' } ],
-  });
+  let products: any[] = [];
+  try {
+    products = await prisma.product.findMany({
+      orderBy: [ { sortOrder: 'asc' }, { createdAt: 'desc' } ],
+    });
+  } catch (err) {
+    // fail gracefully during build/runtime if DB is unreachable
+    console.error("Prisma query failed in /admin/products:", err);
+    products = [];
+  }
 
   async function deleteProduct(formData: FormData) {
     "use server";
