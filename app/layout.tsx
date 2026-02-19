@@ -26,10 +26,7 @@ export default function RootLayout({
               COLOUR <span className="bg-gradient-to-r from-blue-600 to-pink-500 bg-clip-text text-transparent font-extrabold">MAGIC</span>
             </Link>
             
-            <nav className="hidden md:flex gap-8 text-sm font-medium">
-              <Link href="/" className="hover:text-blue-600 transition">Products</Link>
-              <Link href="/admin/products" className="text-slate-400 hover:text-slate-600">Admin</Link>
-            </nav>
+
 
             <a 
               href="https://wa.me/+91 89206 05061" 
