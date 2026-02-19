@@ -3,8 +3,9 @@ import { Prisma } from "@prisma/client";
 import ProductGrid from "@/src/components/ProductGrid";
 import Link from "next/link";
 
-export default async function ProductsPage({ searchParams }: { searchParams?: { q?: string } }) {
-  const q = searchParams?.q ?? undefined;
+export default async function ProductsPage({ searchParams }: { searchParams: Promise<{ q?: string } | undefined> }) {
+  const params = await searchParams;
+  const q = params?.q ?? undefined;
 
   const where: Prisma.ProductWhereInput | undefined = q
     ? {
@@ -15,7 +16,7 @@ export default async function ProductsPage({ searchParams }: { searchParams?: { 
       }
     : undefined;
 
-  const products = await prisma.product.findMany({ where, orderBy: { createdAt: "desc" } });
+  const products = await prisma.product.findMany({ where, orderBy: [{ sortOrder: 'asc' }, { createdAt: 'desc' }] });
 
   return (
     <div className="min-h-screen bg-zinc-50">

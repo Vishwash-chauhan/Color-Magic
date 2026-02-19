@@ -16,7 +16,7 @@ export default async function ProductPage({ params }: Props) {
   // fetch other products to show below the details
   const otherProducts = await prisma.product.findMany({
     where: { id: { not: id } },
-    orderBy: { createdAt: "desc" },
+    orderBy: [{ sortOrder: 'asc' }, { createdAt: "desc" }],
     take: 4,
   });
 

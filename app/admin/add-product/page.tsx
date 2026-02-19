@@ -29,7 +29,11 @@ export default function AddProductPage() {
       })
     );
 
-    const createData: any = { name, description, imageUrls };
+    // set sortOrder to be the current max + 1 so new products appear at the end
+    const max = await prisma.product.findFirst({ orderBy: { sortOrder: 'desc' } });
+    const nextOrder = (max?.sortOrder ?? 0) + 1;
+
+    const createData: any = { name, description, imageUrls, sortOrder: nextOrder };
     if (price !== undefined) createData.price = price;
 
     await prisma.product.create({
