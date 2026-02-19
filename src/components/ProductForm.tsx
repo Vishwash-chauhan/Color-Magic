@@ -27,6 +27,21 @@ export default function ProductForm({ onSubmit, initialData, isEdit = false }: P
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
+  // Rich text description state and editor ref
+  const [description, setDescription] = useState(initialData?.description ?? "");
+  const editorRef = useRef<HTMLDivElement | null>(null);
+
+  function exec(command: string, value?: string) {
+    // use deprecated execCommand for simple rich-text features (widely supported)
+    document.execCommand(command, false, value);
+    // update state from editor content
+    setDescription(editorRef.current?.innerHTML || "");
+  }
+
+  function stripHtml(html: string) {
+    return html.replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ").trim();
+  }
+
   useEffect(() => {
     // generate previews for selectedFiles
     const urls = selectedFiles.map((f) => URL.createObjectURL(f));
@@ -41,6 +56,21 @@ export default function ProductForm({ onSubmit, initialData, isEdit = false }: P
     // keep initial existing urls in sync if initialData changes
     setKeptExistingUrls(initialData?.imageUrls ?? []);
   }, [initialData?.imageUrls]);
+
+  // initialize editor content from initialData.description once (keeps DOM-managed editor stable)
+  useEffect(() => {
+    if (editorRef.current) {
+      editorRef.current.innerHTML = initialData?.description ?? "";
+      setDescription(editorRef.current.innerHTML || "");
+    }
+  }, [initialData?.description]);
+
+  function handlePaste(e: React.ClipboardEvent<HTMLDivElement>) {
+    e.preventDefault();
+    const text = e.clipboardData.getData("text/plain");
+    document.execCommand("insertText", false, text);
+    setDescription(editorRef.current?.innerHTML || "");
+  }
 
   // Keep the native file input in sync with selectedFiles (so FormData picks correct files)
   function syncInputFiles(files: File[]) {
@@ -87,12 +117,25 @@ export default function ProductForm({ onSubmit, initialData, isEdit = false }: P
     e.preventDefault();
     setIsSubmitting(true);
 
+    // description must not be empty
+    if (!stripHtml(description)) {
+      alert('Please enter a product description.');
+      setIsSubmitting(false);
+      return;
+    }
+
     // validation: require at least one image for new product
     if (!isEdit && selectedFiles.length + keptExistingUrls.length === 0) {
       alert("Please upload at least one image.");
       setIsSubmitting(false);
       return;
     }
+
+    // ensure hidden description input matches editor content before serialization
+    const descHtml = editorRef.current?.innerHTML || '';
+    const hiddenDesc = (e.currentTarget.querySelector('input[name="description"]') as HTMLInputElement | null);
+    if (hiddenDesc) hiddenDesc.value = descHtml;
+    setDescription(descHtml);
 
     // Build FormData from the form element. Hidden inputs for `keepImageUrls` are rendered
     // for kept existing images, so we don't append them again here (avoids duplicates).
@@ -121,7 +164,49 @@ export default function ProductForm({ onSubmit, initialData, isEdit = false }: P
 
         <div>
           <label className="block text-sm font-semibold mb-2">Description</label>
-          <textarea name="description" required defaultValue={initialData?.description} placeholder="Describe the print quality, GSM, size, etc." className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition h-32" />
+
+          <div className="border border-slate-200 rounded-lg bg-white shadow-sm">
+            <div className="flex items-center gap-2 px-2 py-2 border-b border-slate-100 bg-slate-50 rounded-t-lg">
+              <button type="button" onClick={() => exec('bold')} className="px-2 py-1 text-sm rounded hover:bg-slate-100">B</button>
+              <button type="button" onClick={() => exec('italic')} className="px-2 py-1 text-sm rounded hover:bg-slate-100">I</button>
+              <button type="button" onClick={() => exec('underline')} className="px-2 py-1 text-sm rounded hover:bg-slate-100">U</button>
+              <button type="button" onClick={() => exec('insertUnorderedList')} className="px-2 py-1 text-sm rounded hover:bg-slate-100">• List</button>
+              <button type="button" onClick={() => exec('insertOrderedList')} className="px-2 py-1 text-sm rounded hover:bg-slate-100">1. List</button>
+              <button
+                type="button"
+                onClick={() => {
+                  const url = prompt('Enter link URL (https://...)');
+                  if (url) exec('createLink', url);
+                }}
+                className="px-2 py-1 text-sm rounded hover:bg-slate-100"
+              >
+                Link
+              </button>
+              <button type="button" onClick={() => exec('formatBlock', 'blockquote')} className="px-2 py-1 text-sm rounded hover:bg-slate-100">❝</button>
+              <button type="button" onClick={() => exec('removeFormat')} className="px-2 py-1 text-sm rounded hover:bg-slate-100">Clear</button>
+            </div>
+
+            <div className="relative">
+              <div
+                ref={editorRef}
+                contentEditable
+                suppressContentEditableWarning
+                role="textbox"
+                aria-multiline="true"
+                className="min-h-[120px] p-4 text-sm focus:outline-none"
+                onInput={() => setDescription(editorRef.current?.innerHTML || '')}
+                onPaste={handlePaste}
+              />
+
+              {/* placeholder */}
+              {!stripHtml(description) && (
+                <div className="pointer-events-none absolute top-4 left-4 text-sm text-slate-400">Describe the print quality, GSM, size, etc.</div>
+              )}
+            </div>
+          </div>
+
+          {/* hidden input so FormData contains the HTML description */}
+          <input type="hidden" name="description" value={description} />
         </div>
 
         <div className="grid grid-cols-2 gap-4">

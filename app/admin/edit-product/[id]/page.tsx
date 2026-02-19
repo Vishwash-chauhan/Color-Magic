@@ -24,9 +24,13 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
     "use server";
 
     const name = formData.get("name") as string;
-    const description = formData.get("description") as string;
+    let description = formData.get("description") as string;
     const priceStr = formData.get("price") as string;
     const price = priceStr ? parseFloat(priceStr) : undefined;
+
+    // sanitize description HTML before storing
+    const DOMPurify = (await import('isomorphic-dompurify')).default;
+    description = DOMPurify.sanitize(description || '');
 
     // Get files (optional for edit)
     const rawFiles = formData.getAll("images");
@@ -70,7 +74,7 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
       initialData={{
         name: product.name,
         description: product.description,
-        price: product.price,
+        price: product.price ?? undefined,
         imageUrls: product.imageUrls,
       }}
       isEdit={true}

@@ -1,5 +1,8 @@
 import { prisma } from "@/src/lib/prisma";
 import { notFound } from "next/navigation";
+import Link from "next/link";
+import ProductGrid from "@/src/components/ProductGrid";
+import ProductDetails from "@/src/components/ProductDetails";
 
 interface Props {
   params: { id: string } | Promise<{ id: string }>;
@@ -10,45 +13,35 @@ export default async function ProductPage({ params }: Props) {
   const product = await prisma.product.findUnique({ where: { id } });
   if (!product) notFound();
 
+  // fetch other products to show below the details
+  const otherProducts = await prisma.product.findMany({
+    where: { id: { not: id } },
+    orderBy: { createdAt: "desc" },
+    take: 4,
+  });
+
   return (
     <div className="min-h-screen bg-zinc-50">
       <main className="mx-auto max-w-5xl px-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-white p-8 rounded-2xl border border-slate-100 shadow-sm">
-          <div>
-            <div className="rounded-xl overflow-hidden border border-slate-100 bg-slate-50">
-              <img src={product.imageUrls[0] ?? '/placeholder.png'} alt={product.name} className="w-full h-96 object-cover" />
-            </div>
+        {/* Product details and breadcrumb moved into reusable component */}
+        <ProductDetails product={product} />
 
-            {product.imageUrls.length > 1 && (
-              <div className="mt-4 grid grid-cols-4 gap-2">
-                {product.imageUrls.map((url, i) => (
-                  <img key={i} src={url} alt={`${product.name} ${i + 1}`} className="w-full h-24 object-cover rounded-lg border border-slate-200" />
-                ))}
-              </div>
-            )}
+        {/* You might also like */}
+        <section className="mt-12">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-slate-900">You might also like</h2>
+            <Link href="/products" className="text-sm text-slate-500 hover:underline">View all</Link>
           </div>
 
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900">{product.name}</h1>
-            <p className="mt-4 text-slate-700">{product.description}</p>
-
-            <div className="mt-6 text-2xl font-extrabold text-slate-900">{product.price ? `₹${product.price.toFixed(2)}` : 'Price on request'}</div>
-
-            <div className="mt-6 flex gap-3">
-              <button className="rounded-full bg-slate-900 text-white px-6 py-3 font-semibold hover:bg-slate-800" disabled>
-                Add to cart
-              </button>
-              <a href={`/admin/edit-product/${product.id}`} className="rounded-full border px-5 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50">
-                Edit (admin)
-              </a>
+          {otherProducts.length > 0 ? (
+            <ProductGrid products={otherProducts} />
+          ) : (
+            <div className="rounded-2xl bg-white p-8 border border-slate-100 text-center">
+              <p className="text-slate-500 mb-4">No related products available right now.</p>
+              <Link href="/products" className="inline-block rounded-full bg-slate-900 text-white px-5 py-2 text-sm font-semibold hover:bg-slate-800">Browse catalog</Link>
             </div>
-
-            <div className="mt-8 text-sm text-slate-500">
-              <div>Category: {product.category ?? '—'}</div>
-              <div className="mt-2">Added: {product.createdAt.toDateString()}</div>
-            </div>
-          </div>
-        </div>
+          )}
+        </section>
       </main>
     </div>
   );

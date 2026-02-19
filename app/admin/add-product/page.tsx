@@ -9,9 +9,13 @@ export default function AddProductPage() {
     "use server";
 
     const name = formData.get("name") as string;
-    const description = formData.get("description") as string;
+    let description = formData.get("description") as string;
     const priceStr = formData.get("price") as string;
     const price = priceStr ? parseFloat(priceStr) : undefined;
+
+    // sanitize description HTML before storing
+    const DOMPurify = (await import('isomorphic-dompurify')).default;
+    description = DOMPurify.sanitize(description || '');
 
     // Get files (can be up to 8)
     const rawFiles = formData.getAll("images");
