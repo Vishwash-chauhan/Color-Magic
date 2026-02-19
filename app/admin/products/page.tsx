@@ -20,6 +20,24 @@ export default async function AdminProductsPage() {
     revalidatePath("/admin/products");
   }
 
+  async function setFeatured(formData: FormData) {
+    "use server";
+
+    const id = formData.get("id") as string;
+    const setStr = formData.get("set") as string;
+    const set = setStr === "true";
+
+    if (set) {
+      const count = await prisma.product.count({ where: { isFeatured: true } as any });
+      if (count >= 12) {
+        throw new Error("Maximum of 12 featured products allowed. Unfeature another product first.");
+      }
+    }
+
+    await prisma.product.update({ where: { id }, data: ({ isFeatured: set } as any) });
+    revalidatePath("/admin/products");
+  }
+
   return (
     <div className="max-w-7xl mx-auto p-8">
       <div className="flex justify-between items-center mb-8">
@@ -55,6 +73,7 @@ export default async function AdminProductsPage() {
                 <th className="text-left p-4 font-semibold text-sm">Description</th>
                 <th className="text-left p-4 font-semibold text-sm">Price</th>
                 <th className="text-left p-4 font-semibold text-sm">Images</th>
+                <th className="text-left p-4 font-semibold text-sm">Featured</th>
                 <th className="text-right p-4 font-semibold text-sm">Actions</th>
               </tr>
             </thead>
@@ -77,6 +96,19 @@ export default async function AdminProductsPage() {
                   <td className="p-4 font-semibold">{product.price ? `₹${product.price.toFixed(2)}` : '-'}</td>
                   <td className="p-4 text-slate-500 text-sm">
                     {product.imageUrls.length} image{product.imageUrls.length !== 1 ? "s" : ""}
+                  </td>
+                  <td className="p-4 text-center">
+                    <form action={setFeatured} className="inline">
+                      <input type="hidden" name="id" value={product.id} />
+                      <input type="hidden" name="set" value={(product as any).isFeatured ? "false" : "true"} />
+                      <button
+                        type="submit"
+                        className={`px-3 py-1 rounded-lg text-sm font-medium transition ${(product as any).isFeatured ? 'bg-yellow-400 text-slate-800' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
+                        title={(product as any).isFeatured ? 'Unfeature' : 'Set as featured'}
+                      >
+                        {(product as any).isFeatured ? '★ Featured' : 'Set featured'}
+                      </button>
+                    </form>
                   </td>
                   <td className="p-4">
                     <div className="flex gap-2 justify-end">

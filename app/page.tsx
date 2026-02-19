@@ -3,7 +3,7 @@ import Hero from "@/src/components/Hero";
 import ProductGrid from "@/src/components/ProductGrid";
 
 export default async function Home() {
-  const featured = await prisma.product.findMany({ orderBy: { createdAt: "desc" }, take: 6 });
+  const featured = await prisma.product.findMany({ where: { isFeatured: true } as any, orderBy: { createdAt: "desc" }, take: 12 });
 
   return (
     <div className="min-h-screen bg-zinc-50 font-sans py-6">
