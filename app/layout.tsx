@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Montserrat } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
+import Footer from "@/src/components/Footer";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const montserrat = Montserrat({ subsets: ["latin"], variable: "--font-montserrat" });
@@ -31,7 +32,7 @@ export default function RootLayout({
             </nav>
 
             <a 
-              href="https://wa.me/YOUR_PHONE_NUMBER" 
+              href="https://wa.me/+91 89206 05061" 
               className="bg-[#25D366] hover:bg-[#20ba5a] text-white px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2 transition-all shadow-md"
             >
               Contact Us
@@ -43,12 +44,8 @@ export default function RootLayout({
           {children}
         </main>
 
-        <footer className="bg-white border-t py-10 mt-20">
-          <div className="container mx-auto px-4 text-center">
-            <p className="font-bold text-slate-800">COLOUR MAGIC</p>
-            <p className="text-sm text-slate-500 mt-2">© 2026 Premium Printing Services. All rights reserved.</p>
-          </div>
-        </footer>
+        {/* site footer (moved to component) */}
+        <Footer />
       </body>
     </html>
   );

@@ -50,7 +50,7 @@ export default function ProductDetails({ product }: { product: Product }) {
               className="inline-flex items-center gap-2 rounded-full bg-green-600 text-white px-5 py-3 font-semibold hover:bg-green-700 transition"
               aria-label={`Enquire about ${product.name} on WhatsApp`}
             >
-              <img src="https://img.icons8.com/ios-filled/24/ffffff/whatsapp.png" alt="WhatsApp" className="w-4 h-4" />
+              <img src="https://api.iconify.design/simple-icons/whatsapp.svg?color=%23ffffff" alt="WhatsApp" className="w-4 h-4" />
               Check Price
             </a>
           </div>
