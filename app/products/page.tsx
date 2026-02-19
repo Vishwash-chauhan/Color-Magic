@@ -18,7 +18,7 @@ export default async function ProductsPage({ searchParams }: { searchParams?: { 
   const products = await prisma.product.findMany({ where, orderBy: { createdAt: "desc" } });
 
   return (
-    <div className="min-h-screen bg-zinc-50 py-12">
+    <div className="min-h-screen bg-zinc-50">
       <main className="mx-auto max-w-7xl px-6">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
           <div>

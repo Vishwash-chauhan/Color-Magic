@@ -6,7 +6,7 @@ export default async function Home() {
   const featured = await prisma.product.findMany({ orderBy: { createdAt: "desc" }, take: 6 });
 
   return (
-    <div className="min-h-screen bg-zinc-50 font-sans py-12">
+    <div className="min-h-screen bg-zinc-50 font-sans py-6">
       <main className="mx-auto max-w-7xl px-6">
         <Hero />
 
