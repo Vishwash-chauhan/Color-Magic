@@ -27,7 +27,7 @@ export default function RootLayout({
             
             <nav className="hidden md:flex gap-8 text-sm font-medium">
               <Link href="/" className="hover:text-blue-600 transition">Products</Link>
-              <Link href="/admin" className="text-slate-400 hover:text-slate-600">Admin</Link>
+              <Link href="/admin/products" className="text-slate-400 hover:text-slate-600">Admin</Link>
             </nav>
 
             <a 
