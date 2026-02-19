@@ -20,7 +20,7 @@ export default function Hero() {
               href="/admin/add-product"
               className="w-full sm:w-auto text-center inline-flex items-center justify-center gap-2 rounded-full border border-slate-200 px-5 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 transition"
             >
-              Sell with us
+              Get A Quote
             </a>
           </div>
         </div>

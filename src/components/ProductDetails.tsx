@@ -42,9 +42,17 @@ export default function ProductDetails({ product }: { product: Product }) {
           <div className="mt-6 text-2xl font-extrabold text-slate-900">{product.price ? `₹${product.price.toFixed(2)}` : "Price on request"}</div>
 
           <div className="mt-6 flex gap-3">
-            <button className="rounded-full bg-slate-900 text-white px-6 py-3 font-semibold hover:bg-slate-800" disabled>
-              Add to cart
-            </button>
+            {/* WhatsApp enquiry with prefilled message */}
+            <a
+              href={`https://wa.me/?text=${encodeURIComponent(`Hi, I would like to enquire about ${product.name}`)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-full bg-green-600 text-white px-5 py-3 font-semibold hover:bg-green-700 transition"
+              aria-label={`Enquire about ${product.name} on WhatsApp`}
+            >
+              <img src="https://img.icons8.com/ios-filled/24/ffffff/whatsapp.png" alt="WhatsApp" className="w-4 h-4" />
+              Check Price
+            </a>
           </div>
 
           <div className="mt-8 text-sm text-slate-500">
