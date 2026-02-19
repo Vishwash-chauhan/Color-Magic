@@ -30,23 +30,27 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
 
     // Get files (optional for edit)
     const rawFiles = formData.getAll("images");
-    const files = rawFiles.filter((f) => f instanceof File && f.size > 0) as File[];
+    const files = rawFiles.filter((f) => f instanceof File && (f as File).size > 0) as File[];
     const selected = files.slice(0, 8); // enforce max 8
+
+    // keepImageUrls: which existing urls the user wants to keep
+    let keepImageUrls = (formData.getAll("keepImageUrls") as string[])?.map((v) => String(v)) || [];
+
+    // dedupe keepImageUrls in case of accidental duplication
+    keepImageUrls = Array.from(new Set(keepImageUrls));
 
     // Fetch current product to get existing images
     const currentProduct = await prisma.product.findUnique({
       where: { id },
     });
 
-    let imageUrls = currentProduct?.imageUrls || []; // Keep existing images by default
+    // start with kept existing images (may be empty if user removed all)
+    let imageUrls: string[] = keepImageUrls.length > 0 ? keepImageUrls : (currentProduct?.imageUrls || []);
 
-    // Only upload new images if files were selected
+    // If new files were selected, upload and append to kept images (enforce max 8)
     if (selected.length > 0) {
-      imageUrls = await Promise.all(
-        selected.map(async (file) => {
-          return await uploadFileToCloudinary(file);
-        })
-      );
+      const uploaded = await Promise.all(selected.map(async (file) => uploadFileToCloudinary(file)));
+      imageUrls = Array.from(new Set([...(keepImageUrls || []), ...uploaded])).slice(0, 8);
     }
 
     const updateData: any = { name, description, imageUrls };
