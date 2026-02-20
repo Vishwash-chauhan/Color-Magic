@@ -39,7 +39,7 @@ export default function ProductDetails({ product }: { product: Product }) {
 
           <div className="mt-4 text-slate-700 prose max-w-none" dangerouslySetInnerHTML={{ __html: safeDescription }} />
 
-          <div className="mt-6 text-2xl font-extrabold text-slate-900">{product.price ? `₹${product.price.toFixed(2)}` : "Price on request"}</div>
+          {/* <div className="mt-6 text-2xl font-extrabold text-slate-900">{product.price ? `₹${product.price.toFixed(2)}` : "Price on request"}</div> */}
 
           <div className="mt-6 flex gap-3">
             {/* WhatsApp enquiry with prefilled message */}
